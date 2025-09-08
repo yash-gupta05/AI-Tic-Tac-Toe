@@ -1,6 +1,6 @@
 # 🎮 AI Tic-Tac-Toe
 
-A React-based Tic-Tac-Toe game with an intelligent AI opponent, multiple difficulty levels, and suggested moves. Challenge yourself against the computer and improve your strategy! <br>
+A React-based Tic-Tac-Toe game with an intelligent AI opponent, multiple difficulty levels, and suggested moves. Challenge yourself against the computer and improve your strategy!
 🎯 [Play now](https://yash-gupta05.github.io/AI-Tic-Tac-Toe/)
 
 ## 🚀 Features

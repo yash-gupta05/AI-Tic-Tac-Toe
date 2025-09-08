@@ -21,6 +21,7 @@ function App() {
   const [win, setWin] = useState("");
   const [flashIndices, setFlashIndices] = useState([]);
   const [move, setMove] = useState("");
+  const [showSuggestion, setShowSuggestion] = useState(false); // ✅ new state
 
   const setDepthFn = (evtKey) => { setDepth(Number(evtKey)); setSubmit(false); };
   const setPlayerFn = (evtKey) => {
@@ -31,10 +32,16 @@ function App() {
   };
 
   const onClick = (index) => {
-    if(grid[index] === "X" || grid[index] === "O") return;
-    updateGrid(index, HUMAN_PLAYER_SYMBOL);
-    setPlayer(AI_PLAYER);
-  };
+  if (grid[index] === "X" || grid[index] === "O") return;
+
+  updateGrid(index, HUMAN_PLAYER_SYMBOL);
+  setPlayer(AI_PLAYER);
+
+  // ✅ Turn off suggestion once move is made
+  setShowSuggestion(false);
+  setMove(""); 
+};
+
 
   const updateGrid = (index, value) => {
     const newGrid = [...grid];
@@ -56,10 +63,12 @@ function App() {
   };
 
   useEffect(() => {
-    if(player === HUMAN_PLAYER) {
+    if(player === HUMAN_PLAYER && showSuggestion) {  // ✅ only if toggled ON
       const tempGrid = [...grid];
       const suggestedMove = minimax(tempGrid, HUMAN_PLAYER_SYMBOL, 100);
       setSuggestMove(suggestedMove.index);
+    } else {
+      setMove(""); // clear suggestion if OFF
     }
 
     if(player === AI_PLAYER) {
@@ -72,7 +81,7 @@ function App() {
       }
       setPlayer(HUMAN_PLAYER);
     }
-  }, [submit, player, grid, depth]); // added missing dependencies
+  }, [submit, player, grid, depth, showSuggestion]); // ✅ include showSuggestion
 
   const setSuggestMove = (value) => {
     const mapping = [
@@ -89,7 +98,6 @@ function App() {
       [0,3,6], [1,4,7], [2,5,8],
       [0,4,8], [2,4,6]
     ];
-
     for(const combo of combos){
       if(currentGrid[combo[0]] === currentGrid[combo[1]] &&
          currentGrid[combo[1]] === currentGrid[combo[2]]) {
@@ -138,7 +146,9 @@ function App() {
     setGrid([0,1,2,3,4,5,6,7,8]);
     setPlayer(HUMAN_PLAYER);
     setFlashIndices([]);
-  };
+    setShowSuggestion(false);   // ✅ reset suggestion toggle
+};
+
 
   const borderLessCard = { border: 0, alignItems: 'center' };
 
@@ -168,10 +178,30 @@ function App() {
             <ListGroup className="list-group-flush">
               <ListGroupItem>Player: {mapPlayer[player]}</ListGroupItem>
               <ListGroupItem>Depth: {depth !== 100 ? depth : "MAX"}</ListGroupItem>
-              <ListGroupItem>Suggested Move: {move}</ListGroupItem>
+              <ListGroupItem>
+                Suggested Move: {showSuggestion ? move : ""}
+              </ListGroupItem>
             </ListGroup>
           </Card.Body>
-          <Button size="lg" variant="warning" onClick={newGame}>New Game</Button>
+          <Card.Body className="d-flex flex-column">
+          <Button 
+            size="lg" 
+            variant={showSuggestion ? "danger" : "success"} 
+            onClick={() => setShowSuggestion(!showSuggestion)}
+            className="mb-2 w-100"   // ✅ full width + margin bottom
+          >
+            {showSuggestion ? "Hide Suggestion" : "Show Suggestion"}
+          </Button>
+
+          <Button 
+            size="lg" 
+            variant="warning" 
+            onClick={newGame}
+            className="w-100"        // ✅ full width
+          >
+            New Game
+          </Button>
+        </Card.Body>
         </Card>
         <Card style={borderLessCard}>
           <Grid grid={grid} clickHandler={onClick} flashIndices={flashIndices}/>

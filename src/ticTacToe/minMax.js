@@ -1,63 +1,114 @@
-import { HUMAN_PLAYER_SYMBOL, AI_PLAYER_SYMBOL } from "../App";
+import {HUMAN_PLAYER_SYMBOL, AI_PLAYER_SYMBOL} from "../App";
 
-export function minimax(newBoard, player, depth, alpha = -Infinity, beta = Infinity) {
-  const availSpots = emptyIndexies(newBoard);
+export function minimax(newBoard, player, depth) 
+{
+        //available spots array
+        var availSpots = emptyIndexies(newBoard);
 
-  // Terminal states
-  if (winning(newBoard, HUMAN_PLAYER_SYMBOL)) return { score: -10 };
-  if (winning(newBoard, AI_PLAYER_SYMBOL)) return { score: 10 };
-  if (availSpots.length === 0 || depth === 0) return { score: 0 };
+        // checks for the terminal states such as win, lose, and tie and returning a value accordingly
+        if (winning(newBoard, HUMAN_PLAYER_SYMBOL)) 
+        {
+            return {score: -10};
+        } 
+        else if (winning(newBoard, AI_PLAYER_SYMBOL))
+        {
+            return {score: 10};
+        } 
+        else if (availSpots.length === 0) 
+        {
+            return {score: 0};
+        }
+        if (depth === 0) 
+        {
+            return {score: 0};
+        }
 
-  const moves = [];
-  let bestMoveIndex;
+        // an array to collect all the objects
+        var moves = [];
 
-  for (let i = 0; i < availSpots.length; i++) {
-    const move = { index: newBoard[availSpots[i]] };
+        // loop through available spots
+        for (var i = 0; i < availSpots.length; i++)
+        {
+            //create an object for each and store the index of that spot that was stored as a number in the object's index key
+                var move = {};
+                move.index = newBoard[availSpots[i]];
 
-    // Set spot to current player
-    newBoard[availSpots[i]] = player;
+                // set the empty spot to the current player
+                newBoard[availSpots[i]] = player;
 
-    // Recurse for opponent
-    const opponent = player === AI_PLAYER_SYMBOL ? HUMAN_PLAYER_SYMBOL : AI_PLAYER_SYMBOL;
-    const result = minimax(newBoard, opponent, depth - 1, alpha, beta);
-    move.score = result.score;
+                //if collect the score resulted from calling minimax on the opponent of the current player
+                if (player === AI_PLAYER_SYMBOL) 
+                {
+                    var result = minimax(newBoard, HUMAN_PLAYER_SYMBOL,depth--);
+                    move.score = result.score;
+                } 
+                else 
+                {
+                    var result = minimax(newBoard, AI_PLAYER_SYMBOL,depth--);
+                    move.score = result.score;
+                }
 
-    // Reset spot
-    newBoard[availSpots[i]] = move.index;
-    moves.push(move);
+                //reset the spot to empty
+                newBoard[availSpots[i]] = move.index;
 
-    // Determine best move and apply alpha-beta pruning
-    if (player === AI_PLAYER_SYMBOL) {
-      if (bestMoveIndex === undefined || move.score > moves[bestMoveIndex].score) bestMoveIndex = i;
-      alpha = Math.max(alpha, move.score);
-    } else {
-      if (bestMoveIndex === undefined || move.score < moves[bestMoveIndex].score) bestMoveIndex = i;
-      beta = Math.min(beta, move.score);
-    }
+                // push the all possible like out of 4 nodes 2 are  objects to the array
+                moves.push(move);
+        }
 
-    if (beta <= alpha) break;
-  }
+        // if it is the computer's turn loop over the moves and choose the move with the highest score
+        var bestMove;
+        if (player === AI_PLAYER_SYMBOL) 
+        {
+            var bestScore = -10000;
+            for (var i = 0; i < moves.length; i++) 
+            {
+                if (moves[i].score > bestScore)
+                {
+                    bestScore = moves[i].score;
+                    bestMove = i;
+                }
+            }
+        } 
+        // else loop over the moves and choose the move with the lowest score
+        else
+         {
+            var bestScore = 10000;
+            for (var i = 0; i < moves.length; i++) 
+            {
+                if (moves[i].score < bestScore) 
+                {
+                    bestScore = moves[i].score;
+                    bestMove = i;
+                }
+            }
+        }
 
-  return moves[bestMoveIndex];
+        // return the chosen move (object) from the array to the higher depth
+        return moves[bestMove];
 }
 
-// Returns available spots on the board
+// //1.returns the available spots on the board/grid
 export function emptyIndexies(board) {
-  return board.filter((s) => s !== "O" && s !== "X");
+    return board.filter(s => s !== "O" && s !== "X");
 }
 
-// Check for a winning combination
-export function winning(board, player) {
-  const winCombos = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
-
-  return winCombos.some((combo) => combo.every((index) => board[index] === player));
+// winning combinations using the board indexies for instance the first win could be 3 xes in a row
+export function winning(board, player)
+{
+    if (
+        (board[0] === player && board[1] === player && board[2] === player) ||
+        (board[3] === player && board[4] === player && board[5] === player) ||
+        (board[6] === player && board[7] === player && board[8] === player) ||
+        (board[0] === player && board[3] === player && board[6] === player) ||
+        (board[1] === player && board[4] === player && board[7] === player) ||
+        (board[2] === player && board[5] === player && board[8] === player) ||
+        (board[0] === player && board[4] === player && board[8] === player) ||
+        (board[2] === player && board[4] === player && board[6] === player)
+    ) 
+    {
+      return true;
+    } 
+    else {
+        return false;
+    }
 }
